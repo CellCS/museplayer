@@ -190,9 +190,11 @@ class MatlabWriter(OutputHandler):
         file_name = self.__file_out
         if self.files_written:
             if '.mat' in self.__file_out[len(self.__file_out)-4:len(self.__file_out)]:
-                file_name = self.__file_out[0:len(self.__file_out)-4] + '_' + str(self.files_written+1) + '.mat'
+                file_name = self.__file_out[0:len(self.__file_out)-4] + '_' + str(self.files_written+1)
             else:
-                file_name = self.__file_out + '_' + str(self.files_written+1) + '.mat'
+                file_name = self.__file_out + '_' + str(self.files_written+1)
+        if not file_name.endswith('.mat'):
+            file_name = file_name + '.mat'
 
         data_to_write['IXDATA'] = self.convert_list_to_numpy_list(data_to_write['IXDATA'])
         data_to_write['IXDATA'][u'markers'] = self.__markers.markers()
