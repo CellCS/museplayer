@@ -125,7 +125,6 @@ class MatlabWriter(OutputHandler):
         self.__verbose = None
         self.__filters = None
 
-
     def set_data_structure(self, config = {}, device = {}):
         self.__dataset = {
             u'IXDATA': {
@@ -161,6 +160,8 @@ class MatlabWriter(OutputHandler):
             u'config': {}, #config data
             u'device': {}, #computing device data
         }
+        self.__dataset['config'] = config
+        self.__dataset['device'] = device
 
     def set_options(self, verbose, filters):
         self.__verbose = verbose
@@ -171,8 +172,20 @@ class MatlabWriter(OutputHandler):
         # Check if there is anything to save
         if len(self.__dataset['config']) == 0:
             self.__dataset['config'] = [['config'], 'missing']
+            config = {}
+        else:
+            config = self.__dataset['config']
         if len(self.__dataset['device']) == 0:
             self.__dataset['device'] = [['device'], 'missing']
+            device = {}
+        else:
+            device = self.__dataset['device']
+
+        #copy buffer
+        data_to_write = self.__dataset
+
+        #Reset dataset
+        self.set_data_structure(config, device)
 
         file_name = self.__file_out
         if self.files_written:
@@ -180,13 +193,14 @@ class MatlabWriter(OutputHandler):
                 file_name = self.__file_out[0:len(self.__file_out)-4] + '_' + str(self.files_written+1)
             else:
                 file_name = self.__file_out + '_' + str(self.files_written+1)
+        if not file_name.endswith('.mat'):
+            file_name = file_name + '.mat'
 
-        self.__dataset['IXDATA'] = self.convert_list_to_numpy_list(self.__dataset['IXDATA'])
-        self.__dataset['IXDATA'][u'markers'] = self.__markers.markers()
-        if 'elements' in self.__dataset:
-            self.__dataset['elements'] = self.convert_list_to_numpy_list(self.__dataset['elements'])
-        h5.write(self.__dataset, path='/', filename=file_name,  truncate_existing=True, store_python_metadata=True, matlab_compatible=True)
-
+        data_to_write['IXDATA'] = self.convert_list_to_numpy_list(data_to_write['IXDATA'])
+        data_to_write['IXDATA'][u'markers'] = self.__markers.markers()
+        if 'elements' in data_to_write:
+            data_to_write['elements'] = self.convert_list_to_numpy_list(data_to_write['elements'])
+        h5.write(data_to_write, path='/', filename=file_name,  truncate_existing=True, store_python_metadata=True, matlab_compatible=True)
         self.files_written += 1
 
     def convert_list_to_numpy_list(self, dictionary):
@@ -328,7 +342,8 @@ class MatlabWriter(OutputHandler):
 
         self.received_data += 1
         self.data_written += 1
-        if self.received_data > 36000*30: #Approximately 1 minutes at 500Hz * 30 for 30 minutes files
+        #Approximately 1 minutes at 500Hz * 35 for 35 minutes files, just over an hour at 220Hz
+        if self.received_data > 36000*35:
             self.write_array()
             self.received_data = 0
 
