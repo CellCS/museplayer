@@ -96,6 +96,10 @@ Examples:
                         nargs='+',
                         help="Filter data by path. e.g. -i /muse/elements/alpha /muse/eeg")
 
+    parser.add_argument("-p", "--split",
+                        action="store_true",
+                        help="Split in one hour long chunks when output is a mat file.")
+
     input_group = parser.add_argument_group("Input options",
                                             "Only one type of input can be specified, but can be multiple files of the same type:")
     input_group.add_argument("-l", "--input-osc-port",
@@ -167,7 +171,7 @@ Examples:
     # as fast as possible
     if args.output_osc_url == None:
         args.as_fast_as_possible = True
-    
+
     print "Input: "
     if args.input_osc_port:
         print args.input_osc_port
@@ -240,7 +244,7 @@ Examples:
         output_handler.add_listener(osc_sender)
     if args.output_matlab_file:
         print "  * Matlab output file: " + str(args.output_matlab_file)
-        matlab_writer = MatlabWriter(args.output_matlab_file)
+        matlab_writer = MatlabWriter(args.output_matlab_file, args.split)
         output_handler.add_listener(matlab_writer)
 
     total_output_types = int(bool(args.output_csv_file)) + int(bool(args.output_oscreplay_file)) + int(bool(args.output_muse_file)) + int(bool(args.output_osc_url)) + int(bool(args.output_matlab_file))

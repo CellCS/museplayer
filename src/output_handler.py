@@ -112,13 +112,14 @@ class ScreenWriter(OutputHandler):
         utilities.DisplayPlayback.print_msg(str(msg[0]) + " " + msg[1] + " " + str(msg[2]) + " " + dataset)
 
 class MatlabWriter(OutputHandler):
-    def __init__(self, out_file):
+    def __init__(self, out_file, split = False):
         # the most important part of dataset is now the first dict which contains the main struct, IXDATA
         self.__dataset = {}
         self.__markers = marker_reconstructor.MarkerReconstructor()
         self.set_data_structure()
         self.__value = []
         self.__file_out = out_file
+        self.__split = split
         self.received_data = 0
         self.data_written = 0
         self.files_written = 0
@@ -342,8 +343,8 @@ class MatlabWriter(OutputHandler):
 
         self.received_data += 1
         self.data_written += 1
-        #Approximately 1 minutes at 500Hz * 35 for 35 minutes files, just over an hour at 220Hz
-        if self.received_data > 36000*35:
+
+        if self.__split and self.received_data > 220*60*60:
             self.write_array()
             self.received_data = 0
 
