@@ -210,7 +210,8 @@ def run():
     parser.add_argument("-o", "--output-mat-file",
                               help="Output MATLAB file",
                               metavar="FILE")
-    parser.add_argument("-v", "--verbose", const="verbose", nargs="?", metavar="", help="Print some output.")
+    parser.add_argument("-p", "--split", action="store_true", help="Split in one hour long chunks.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print some output.")
     args = parser.parse_args()
 
     if not args.input_muse_file or not args.output_mat_file:
@@ -227,7 +228,7 @@ def run():
         if args.verbose:
             print "File opened: " + filename
 
-    matlab_writer = output_handler.MatlabWriter(args.output_mat_file)
+    matlab_writer = output_handler.MatlabWriter(args.output_mat_file, args.split)
     matlab_writer.set_data_structure()
     for key, infile in infiles.iteritems():
         reader = MuseProtoBufReaderV2(infile)
